@@ -53,17 +53,19 @@ public class SimpleMasterRTU {
 
     public static void main(String[] argv) {
         String dir = "C:/Meters";
-        String CommPort = "COM4";
+        String CommPort = "COM2";
         int StartAddress = 11;
         int EndAddress = 30;
 
         SerialParameters sp = new SerialParameters();
+
         Modbus.setLogLevel(Modbus.LogLevel.LEVEL_DEBUG);
         try {
             // you can use just string to get connection with remote slave,
             // but you can also get a list of all serial ports available at your system.
             String[] dev_list = SerialPortList.getPortNames();
             // if there is at least one serial port at your system
+ 
             if (dev_list.length > 0) {
                 // you can choose the one of those you need
                 sp.setDevice(CommPort);//dev_list[2]);
@@ -72,6 +74,8 @@ public class SimpleMasterRTU {
                 sp.setDataBits(8);
                 sp.setParity(SerialPort.Parity.EVEN);
                 sp.setStopBits(1);
+                System.out.println(sp.getParity());
+
                 //you can choose the library to use.
                 //the library uses jssc by default.
                 //
@@ -90,7 +94,9 @@ public class SimpleMasterRTU {
                 // you should use another method:
                 //next you just create your master and use it.
                 ModbusMaster m = ModbusMasterFactory.createModbusMasterRTU(sp);
+                System.out.println("Try to connect");
                 m.connect();
+                System.out.println("Connected");
 
                 int offset = 0;
                 int quantity = 32;
@@ -105,6 +111,7 @@ public class SimpleMasterRTU {
                         try {
                             registerValues = m.readInputRegisters(slaveId, offset, quantity);
                         } catch (Exception e){
+                            e.printStackTrace();
                             m.connect();
                         }
                         // print values
@@ -129,6 +136,7 @@ public class SimpleMasterRTU {
                         }
                     }
                 } catch (RuntimeException e) {
+                    e.printStackTrace();
                     throw e;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -141,6 +149,7 @@ public class SimpleMasterRTU {
                 }
             }
             } catch(RuntimeException e){
+            e.printStackTrace();
                 throw e;
             } catch(Exception e){
                 e.printStackTrace();
@@ -157,6 +166,7 @@ public class SimpleMasterRTU {
             try {
                 Files.write(path, "Time, V L1-2,V L2-3,V L3-1,V1,V2,V3,I1,I2,I3,kW Sum,kVA Sum,KVAR Sum, PF Avg,KWHr (Import),KVArHr (Import),Hz \n".getBytes());
             }catch (IOException e) {
+                e.printStackTrace();
                 //exception handling left as an exercise for the reader
             }
 
@@ -165,6 +175,7 @@ public class SimpleMasterRTU {
             String dataOut  = LocalTime.now() + "," + data;
             Files.write(path, dataOut.getBytes(), StandardOpenOption.APPEND);
         }catch (IOException e) {
+            e.printStackTrace();
             //exception handling left as an exercise for the reader
         }
 
